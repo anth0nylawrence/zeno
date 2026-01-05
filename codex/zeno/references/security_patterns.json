@@ -1,0 +1,203 @@
+{
+  "version": "1.0",
+  "patterns": [
+    {
+      "id": "py-eval",
+      "category": "code-exec",
+      "severity": "high",
+      "pattern": "eval(",
+      "regex": false,
+      "languages": ["python"],
+      "globs": ["**/*.py"],
+      "description": "Dynamic eval can execute attacker-controlled input.",
+      "example": "eval(user_input)"
+    },
+    {
+      "id": "py-exec",
+      "category": "code-exec",
+      "severity": "high",
+      "pattern": "exec(",
+      "regex": false,
+      "languages": ["python"],
+      "globs": ["**/*.py"],
+      "description": "Dynamic exec can execute attacker-controlled input.",
+      "example": "exec(code_str)"
+    },
+    {
+      "id": "py-subprocess",
+      "category": "command-injection",
+      "severity": "high",
+      "pattern": "subprocess",
+      "regex": false,
+      "languages": ["python"],
+      "globs": ["**/*.py"],
+      "description": "Subprocess usage can lead to command injection without sanitization.",
+      "example": "subprocess.run(cmd, shell=True)"
+    },
+    {
+      "id": "py-os-system",
+      "category": "command-injection",
+      "severity": "high",
+      "pattern": "os.system",
+      "regex": false,
+      "languages": ["python"],
+      "globs": ["**/*.py"],
+      "description": "os.system can execute shell commands with user input.",
+      "example": "os.system(user_input)"
+    },
+    {
+      "id": "py-pickle-load",
+      "category": "deserialization",
+      "severity": "high",
+      "pattern": "pickle.load",
+      "regex": false,
+      "languages": ["python"],
+      "globs": ["**/*.py"],
+      "description": "Pickle deserialization can execute arbitrary code.",
+      "example": "pickle.load(file_handle)"
+    },
+    {
+      "id": "py-yaml-load",
+      "category": "deserialization",
+      "severity": "high",
+      "pattern": "yaml.load",
+      "regex": false,
+      "languages": ["python"],
+      "globs": ["**/*.py"],
+      "description": "yaml.load without SafeLoader can execute arbitrary code.",
+      "example": "yaml.load(data)"
+    },
+    {
+      "id": "py-jwt-verify-false",
+      "category": "auth",
+      "severity": "high",
+      "pattern": "verify=False",
+      "regex": false,
+      "languages": ["python"],
+      "globs": ["**/*.py"],
+      "description": "Disabling verification on JWTs can allow forged tokens.",
+      "example": "jwt.decode(token, options={\"verify_signature\": False})"
+    },
+    {
+      "id": "js-eval",
+      "category": "code-exec",
+      "severity": "high",
+      "pattern": "eval(",
+      "regex": false,
+      "languages": ["javascript", "typescript"],
+      "globs": ["**/*.js", "**/*.ts"],
+      "description": "eval can execute attacker-controlled input.",
+      "example": "eval(userInput)"
+    },
+    {
+      "id": "js-new-function",
+      "category": "code-exec",
+      "severity": "high",
+      "pattern": "new Function",
+      "regex": false,
+      "languages": ["javascript", "typescript"],
+      "globs": ["**/*.js", "**/*.ts"],
+      "description": "new Function executes dynamically constructed code.",
+      "example": "new Function(code)"
+    },
+    {
+      "id": "js-child-process",
+      "category": "command-injection",
+      "severity": "high",
+      "pattern": "child_process",
+      "regex": false,
+      "languages": ["javascript", "typescript"],
+      "globs": ["**/*.js", "**/*.ts"],
+      "description": "child_process calls can execute system commands.",
+      "example": "child_process.exec(cmd)"
+    },
+    {
+      "id": "js-jwt-ignore-exp",
+      "category": "auth",
+      "severity": "medium",
+      "pattern": "ignoreExpiration",
+      "regex": false,
+      "languages": ["javascript", "typescript"],
+      "globs": ["**/*.js", "**/*.ts"],
+      "description": "Ignoring JWT expiration can allow stale tokens.",
+      "example": "jwt.verify(token, key, { ignoreExpiration: true })"
+    },
+    {
+      "id": "go-exec",
+      "category": "command-injection",
+      "severity": "high",
+      "pattern": "exec.Command",
+      "regex": false,
+      "languages": ["go"],
+      "globs": ["**/*.go"],
+      "description": "exec.Command can execute system commands.",
+      "example": "exec.Command(cmd, args...)"
+    },
+    {
+      "id": "go-sql-concat",
+      "category": "sql-injection",
+      "severity": "high",
+      "pattern": "SELECT.*\\+",
+      "regex": true,
+      "languages": ["go"],
+      "globs": ["**/*.go"],
+      "description": "SQL string concatenation may allow injection.",
+      "example": "\"SELECT ...\" + userInput"
+    },
+    {
+      "id": "java-runtime-exec",
+      "category": "command-injection",
+      "severity": "high",
+      "pattern": "Runtime.getRuntime().exec",
+      "regex": false,
+      "languages": ["java"],
+      "globs": ["**/*.java"],
+      "description": "Runtime.exec can execute system commands.",
+      "example": "Runtime.getRuntime().exec(cmd)"
+    },
+    {
+      "id": "java-objectinputstream",
+      "category": "deserialization",
+      "severity": "high",
+      "pattern": "ObjectInputStream",
+      "regex": false,
+      "languages": ["java"],
+      "globs": ["**/*.java"],
+      "description": "Java deserialization can be dangerous without validation.",
+      "example": "new ObjectInputStream(in)"
+    },
+    {
+      "id": "ruby-eval",
+      "category": "code-exec",
+      "severity": "high",
+      "pattern": "eval(",
+      "regex": false,
+      "languages": ["ruby"],
+      "globs": ["**/*.rb"],
+      "description": "Ruby eval executes dynamic code.",
+      "example": "eval(user_input)"
+    },
+    {
+      "id": "ruby-yaml-load",
+      "category": "deserialization",
+      "severity": "high",
+      "pattern": "YAML.load",
+      "regex": false,
+      "languages": ["ruby"],
+      "globs": ["**/*.rb"],
+      "description": "YAML.load can execute unsafe classes.",
+      "example": "YAML.load(data)"
+    },
+    {
+      "id": "generic-hardcoded-secret",
+      "category": "secrets",
+      "severity": "medium",
+      "pattern": "api_key",
+      "regex": false,
+      "languages": ["python", "javascript", "typescript", "go", "java", "ruby", "swift", "rust"],
+      "globs": ["**/*.{py,js,ts,go,java,rb,swift,rs}", "**/*.env", "**/*.yaml", "**/*.yml"],
+      "description": "Potential hardcoded API key or secret value.",
+      "example": "API_KEY=..."
+    }
+  ]
+}

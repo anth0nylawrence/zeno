@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
+from pathlib import Path
 from typing import Dict, Iterable, List
 
 
@@ -26,10 +28,12 @@ MODE_DESCRIPTIONS = {
     "codebase-archaeology": "Trace symbol definitions and usages with file:line evidence.",
     "security-audit": "Pattern-based vulnerability triage with evidence chains.",
     "architecture-mapping": "Map entrypoints, lifecycle, and boundaries with citations.",
-    "pr-review": "Review changed files and downstream impacts with evidence.",
+    "pr-review": "Review changed files and downstream impacts with evidence (Git-aware).",
     "skill-generation": "Draft SKILL.md from a new tool repo using citations.",
     "deep-research": "Evidence-first research on large projects without hallucination.",
 }
+
+DEFAULT_SECURITY_PACK = Path(__file__).resolve().parents[1] / "references" / "security_patterns.json"
 
 
 def _globs(language: str | None) -> List[str]:
@@ -43,6 +47,25 @@ def _expand(pattern: str, replacements: Dict[str, str]) -> str:
     for key, repl in replacements.items():
         value = value.replace(f"<{key}>", repl)
     return value
+
+
+def _load_security_pack(path: Path) -> List[Dict]:
+    if not path.exists():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return data.get("patterns", [])
+
+
+def _git_changed_files(root: Path, base: str | None, head: str | None) -> List[str]:
+    cmd = ["git", "-C", str(root), "diff", "--name-only"]
+    if base and head:
+        cmd.append(f"{base}...{head}")
+    elif base:
+        cmd.append(base)
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
 def _build_ops(mode: str, args: argparse.Namespace) -> List[Dict]:
@@ -64,23 +87,21 @@ def _build_ops(mode: str, args: argparse.Namespace) -> List[Dict]:
         ]
 
     if mode == "security-audit":
-        patterns = [
-            ("eval(", globs),
-            ("exec(", globs),
-            ("subprocess", ["**/*.py"]),
-            ("child_process", ["**/*.js", "**/*.ts"]),
-            ("yaml.load", ["**/*.py"]),
-            ("pickle.load", ["**/*.py"]),
-            ("jwt.decode", globs),
-            ("os.system", ["**/*.py"]),
-        ]
+        pack_path = Path(args.pack).resolve() if args.pack else DEFAULT_SECURITY_PACK
+        patterns = _load_security_pack(pack_path)
+        if args.max_patterns:
+            patterns = patterns[: args.max_patterns]
         ops = [{"id": "sec-1", "op": "list_files", "args": {"glob": globs[0], "max": 400}, "purpose": "scope files"}]
-        for idx, (pat, paths) in enumerate(patterns, start=2):
+        for idx, item in enumerate(patterns, start=2):
+            paths = item.get("globs") or globs
+            op_args = {"pattern": item.get("pattern", ""), "paths": paths, "max_hits": 50}
+            if item.get("regex"):
+                op_args["regex"] = True
             ops.append({
                 "id": f"sec-{idx}",
                 "op": "grep",
-                "args": {"pattern": pat, "paths": paths, "max_hits": 50},
-                "purpose": "locate risky pattern",
+                "args": op_args,
+                "purpose": f"{item.get('category','pattern')}:{item.get('id','')}:{item.get('severity','')}".strip(":"),
             })
         return ops
 
@@ -94,6 +115,9 @@ def _build_ops(mode: str, args: argparse.Namespace) -> List[Dict]:
 
     if mode == "pr-review":
         ops = []
+        if args.git or args.base or args.head:
+            git_root = Path(args.git_root).resolve() if args.git_root else Path.cwd()
+            changed_files = _git_changed_files(git_root, args.base, args.head)
         for idx, path in enumerate(changed_files, start=1):
             ops.append({
                 "id": f"pr-{idx}",
@@ -160,6 +184,12 @@ def main() -> int:
     plan.add_argument("--key-term", help="Key term for deep research")
     plan.add_argument("--changed", nargs="*", help="Changed files for PR review")
     plan.add_argument("--format", choices=["jsonl", "json", "text"], default="jsonl")
+    plan.add_argument("--git", action="store_true", help="Use git diff to populate changed files")
+    plan.add_argument("--git-root", help="Git repo root for pr-review")
+    plan.add_argument("--base", help="Base ref for git diff (e.g., origin/main)")
+    plan.add_argument("--head", help="Head ref for git diff")
+    plan.add_argument("--pack", help="Security pattern pack JSON path")
+    plan.add_argument("--max-patterns", type=int, help="Limit number of security patterns")
 
     args = parser.parse_args()
 

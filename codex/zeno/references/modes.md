@@ -30,6 +30,13 @@ Trace where a symbol is defined and used across a large repo, with file:line cit
 4) grep for usage references
 5) read_file snippets for each usage cluster
 
+### Optional accelerator (index)
+If the repo is large, precompute a lightweight index:
+```bash
+python3 scripts/zeno_index.py --root /path/to/repo --out /tmp/zeno_index.json
+```
+Use the index to narrow which files to grep and read.
+
 ### Output additions
 - Definition capsule: file, signature, docstring, evidence
 - Usage table: path, line, context, evidence id
@@ -67,6 +74,12 @@ Triage common vulnerability patterns with explicit evidence chains. Produce a pr
 3) grep for auth/validation guards
 4) read_file around each hit for context
 5) build evidence chains: source -> transform -> sink
+
+### Pattern packs
+Security patterns are defined in `references/security_patterns.json`. You can override the pack used by `zeno_modes.py`:
+```bash
+python3 scripts/zeno_modes.py plan --mode security-audit --pack /path/to/security_patterns.json --format jsonl
+```
 
 ### Output additions
 - Risk table with severity, evidence, and suggested follow-up
@@ -113,6 +126,13 @@ Recursively map entrypoints, runtime lifecycle, and module boundaries without lo
 4) extract_symbols for core modules
 5) grep for dependency wiring and config
 
+### Optional accelerator (index)
+If the repo is large, precompute a lightweight index:
+```bash
+python3 scripts/zeno_index.py --root /path/to/repo --out /tmp/zeno_index.json
+```
+Use the index to prioritize key modules and wiring paths.
+
 ### Output additions
 - System map with lifecycle steps and evidence
 - Component boundaries and responsibilities
@@ -134,6 +154,12 @@ Review changes in large repos with full context: understand what changed, where 
 - changed_files (required list)
 - optional patch excerpt or commit message
 - language or stack (optional)
+
+### Git-aware option
+You can auto-populate changed files from git:
+```bash
+python3 scripts/zeno_modes.py plan --mode pr-review --git --base origin/main --format jsonl
+```
 
 ### Default retrieval plan
 1) read_file each changed file around modified areas

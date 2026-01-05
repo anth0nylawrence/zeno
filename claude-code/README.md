@@ -22,6 +22,7 @@
 - [When to Use Zeno](#when-to-use-zeno)
 - [Modes](#modes)
 - [Triggering Zeno (Natural Language Examples)](#triggering-zeno-natural-language-examples)
+- [Indexing (Symbol + Dependency Map)](#indexing-symbol--dependency-map)
 - [Budgets and Guardrails (Default Behavior)](#budgets-and-guardrails-default-behavior)
 - [JSONL REPL Protocol (Summary)](#jsonl-repl-protocol-summary)
 - [Output Blocks (Required for Persistence)](#output-blocks-required-for-persistence)
@@ -118,6 +119,18 @@ Zeno activates when you explicitly ask for it or name a mode.
 - deep-research: "Zeno deep-research this project and answer: how does auth flow through the system?"
 
 If a mode needs inputs, include them in the request (symbol name, changed files, or research question).
+
+---
+
+## Indexing (Symbol + Dependency Map)
+
+Optional: build a lightweight index to speed up archaeology, architecture mapping, and PR review impact analysis.
+
+```bash
+python3 claude-code/claude/skills/zeno/scripts/zeno_index.py --root /path/to/repo --out /tmp/zeno_index.json
+```
+
+See `claude-code/claude/skills/zeno/references/indexing.md` for details.
 
 ---
 

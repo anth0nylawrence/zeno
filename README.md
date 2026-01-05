@@ -1,6 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
-[![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)  [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)
 [![Docs](https://img.shields.io/badge/Docs-Read%20the%20manual-brightgreen)](README.md)
 [![JSONL](https://img.shields.io/badge/Protocol-JSONL-1f6feb)](#jsonl-repl-protocol-summary)
 [![OpenTelemetry](https://img.shields.io/badge/Telemetry-OpenTelemetry-8A2BE2)](codex/zeno/references/otel.md)
@@ -12,96 +11,332 @@
 
 <p align="center"><img src="assets/zeno.png" width="50%" alt="Zeno"></p>
 
+> **Recursive decomposition for unbounded codebase analysis.** Zeno is an evidence-first, read-only workflow that lets AI models analyze massive codebases without context rot—by keeping the corpus external and pulling only what's needed.
+
 ## Table of Contents
-- [Introduction](#introduction)
-- [What Zeno is (and is not)](#what-zeno-is-and-is-not)
-- [Core ideas](#core-ideas)
-- [Why Zeno?](#why-zeno)
-- [When to use Zeno](#when-to-use-zeno)
-- [Budgets and guardrails (default behavior)](#budgets-and-guardrails-default-behavior)
-- [JSONL REPL protocol (summary)](#jsonl-repl-protocol-summary)
-- [Output blocks (required for persistence)](#output-blocks-required-for-persistence)
-- [Persistence artifacts (where the receipts live)](#persistence-artifacts-where-the-receipts-live)
-- [Security and privacy notes](#security-and-privacy-notes)
-- [Performance notes](#performance-notes)
-- [Repo layout](#repo-layout)
-- [Choose your runtime](#choose-your-runtime)
-- [How the Zeno loop works](#how-the-zeno-loop-works)
-- [Evidence and claims](#evidence-and-claims)
-- [Pattern A (persistence)](#pattern-a-persistence)
-- [Pattern B (telemetry)](#pattern-b-telemetry)
+- [Why Zeno? The Problem It Solves](#why-zeno-the-problem-it-solves)
+- [What Makes Zeno Different](#what-makes-zeno-different)
+- [Architecture](#architecture)
+- [Core Ideas](#core-ideas)
+- [When to Use Zeno](#when-to-use-zeno)
+- [Budgets and Guardrails](#budgets-and-guardrails-default-behavior)
+- [JSONL REPL Protocol](#jsonl-repl-protocol-summary)
+- [Output Blocks](#output-blocks-required-for-persistence)
+- [Persistence Artifacts](#persistence-artifacts-where-the-receipts-live)
+- [Security and Privacy](#security-and-privacy-notes)
+- [Performance Notes](#performance-notes)
+- [Repo Layout](#repo-layout)
+- [Choose Your Runtime](#choose-your-runtime)
+- [How the Zeno Loop Works](#how-the-zeno-loop-works)
+- [Evidence and Claims](#evidence-and-claims)
+- [Pattern A (Persistence)](#pattern-a-persistence)
+- [Pattern B (Telemetry)](#pattern-b-telemetry)
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
-- [Next steps](#next-steps)
+- [Next Steps](#next-steps)
 - [Acknowledgments](#acknowledgments)
 
-## Introduction
-Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
-Technical: Zeno is an evidence-first, read-only workflow for large corpora. It pairs a JSONL REPL server (list_files/read_file/peek/grep/extract_symbols) with strict budgets and a claim-evidence ledger. It supports both Codex and Claude Code with persistence (Pattern A) and optional telemetry (Pattern B).
+---
 
-## What Zeno is (and is not)
-- Zeno is a disciplined analysis workflow for large corpora; it is not a code editor.
-- Zeno is read-only by default; it does not modify files unless you explicitly request edits later.
-- Zeno values auditability over speed: every claim must cite evidence.
+## Why Zeno? The Problem It Solves
 
-## Core ideas
-- Externalize context: keep the corpus in a REPL server, not in the prompt.
-- Minimize retrieval: prefer peek and narrow reads over whole-file loads.
-- Evidence discipline: no evidence, no claim.
-- Recursive inspection: summarize slices, then consolidate into a report.
+**Picture this:** You need to understand a 500k-line codebase—trace a security vulnerability, audit dependency wiring, or map out the architecture. Traditional approaches hit hard limits fast.
 
-## Why Zeno?
-ELI5: Zeno is the philosopher who turned motion into a puzzle about cutting things in half forever. That is basically what we do with giant prompts: split, split, split, then stitch the answer back together.
-Technical:
-- Zeno of Elea is a philosophical patron for recursive decomposition: https://en.wikipedia.org/wiki/Zeno_of_Elea
-- Zeno’s Dichotomy paradox divides a journey in half, then half again, and again, forever.
-- Zeno’s name signals infinite splitting + recursion, which matches “unbounded context via recursive inspection.”
-- RLMs treat a too-long prompt as an external environment and repeatedly decompose it into smaller subproblems until the final answer is assembled.
+### Without Zeno
 
-## When to use Zeno
-- Large repos (hundreds or thousands of files).
-- Long logs or traces where only a few lines matter.
-- Audits (security, concurrency, dependency wiring) that require citations.
-- Any analysis where you want reproducible, evidence-backed answers.
+```
+📁 Your massive codebase (500k+ lines)
+    ↓
+🤖 "Paste the relevant files..."
+    ↓
+😤 Context window fills up after 3 files
+    ↓
+🔄 Model starts "forgetting" earlier context (context rot)
+    ↓
+❌ Hallucinated connections, missed dependencies
+    ↓
+🗑️ Unreliable analysis you can't verify or reproduce
+```
 
-## Budgets and guardrails (default behavior)
-Default caps (unless the user explicitly asks for deeper coverage):
-- Retrieval ops: <= 30 per answer, <= 12 per section.
-- `read_file`: <= 400 lines per call, <= 2,000 lines total per answer.
-- `grep`: <= 200 hits per call; narrow patterns if truncated.
-- Recursion: <= 12 file capsules, depth <= 2.
-- If budgets are hit: stop, summarize, and provide a next retrieval plan.
+### With Zeno
 
-## JSONL REPL protocol (summary)
+```
+📁 Your massive codebase (500k+ lines)
+    ↓
+🔍 Zeno keeps corpus external in REPL server
+    ↓
+📎 Model pulls only the 50-100 lines it needs per query
+    ↓
+🧠 Fresh context window for each recursive inspection
+    ↓
+📋 Every claim backed by evidence with file:line citations
+    ↓
+✅ Auditable, reproducible analysis with receipts
+```
+
+The key insight from Recursive Language Models (RLMs) research: instead of stuffing everything into the prompt, treat the codebase as an **external environment** that the model can programmatically explore, decompose, and query recursively.
+
+---
+
+## What Makes Zeno Different
+
+Zeno isn't just another RAG pipeline or code search tool. It's an **evidence-first analysis workflow** implementing the RLM paradigm—the same approach that achieved 2.7x accuracy improvements on long-context benchmarks by letting models manage their own context.
+
+### The RLM Advantage
+
+Traditional approaches suffer from "context rot"—as token count increases, the model's ability to accurately recall and reason degrades. RLMs solve this by:
+
+1. **Externalizing context**: The corpus lives in a REPL server, not the prompt
+2. **Recursive decomposition**: Complex queries split into sub-queries over smaller slices
+3. **Programmatic exploration**: `grep`, `peek`, `read_file`—surgical retrieval, not bulk loading
+4. **Evidence discipline**: No claim without a citation; every answer is verifiable
+
+### Capability Comparison
+
+| Capability | Zeno | RAG Pipelines | IDE Copilots | Code Search | Full-Context Models |
+|:-----------|:----:|:-------------:|:------------:|:-----------:|:-------------------:|
+| **Unbounded corpus size** | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **Evidence-cited claims** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Recursive decomposition** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Retrieval budgets** | ✅ | Partial | ❌ | ❌ | ❌ |
+| **Claim-evidence ledger** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Multi-runtime support** | ✅ | Partial | ❌ | ❌ | ❌ |
+| **Read-only by design** | ✅ | Varies | ❌ | ✅ | ✅ |
+| **No external indexing** | ✅ | ❌ | ❌ | ❌ | ✅ |
+| **Telemetry/replay audit** | ✅ | Partial | ❌ | ❌ | ❌ |
+
+### Why This Matters
+
+**RAG pipelines** chunk and embed your code, but semantic similarity doesn't capture execution flow, dependency graphs, or cross-file relationships. You get "related snippets," not traced evidence.
+
+**IDE copilots** work great for local edits but struggle with architectural questions spanning hundreds of files. They optimize for autocompletion, not audit trails.
+
+**Full-context models** (even with 200k+ tokens) degrade on complex retrieval tasks. Research shows RLMs outperform GPT-5 by 33%+ on long-context benchmarks because recursive inspection beats bulk ingestion.
+
+**Zeno** gives you: every claim traced to `file:lines`, strict budgets preventing runaway costs, and reproducible analysis sessions persisted to disk.
+
+---
+
+## Architecture
+
+### High-Level Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              ZENO WORKFLOW                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   ┌─────────────┐         ┌──────────────────┐         ┌───────────────┐   │
+│   │             │         │                  │         │               │   │
+│   │   USER      │────────▶│   LLM (Claude/   │────────▶│   JSONL REPL  │   │
+│   │   QUERY     │         │   Codex)         │◀────────│   SERVER      │   │
+│   │             │         │                  │         │               │   │
+│   └─────────────┘         └────────┬─────────┘         └───────┬───────┘   │
+│                                    │                           │           │
+│                                    │ Zeno Blocks               │ Corpus    │
+│                                    ▼                           ▼           │
+│                           ┌──────────────────┐         ┌───────────────┐   │
+│                           │                  │         │               │   │
+│                           │   PERSISTENCE    │         │   YOUR        │   │
+│                           │   LAYER          │         │   CODEBASE    │   │
+│                           │                  │         │               │   │
+│                           └──────────────────┘         └───────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### REPL Server Operations
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         JSONL REPL PROTOCOL                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   ┌─────────────┐                                                           │
+│   │ list_files  │───▶ Discover files matching patterns                      │
+│   └─────────────┘                                                           │
+│                                                                             │
+│   ┌─────────────┐                                                           │
+│   │    peek     │───▶ Tiny previews (first N lines)                         │
+│   └─────────────┘                                                           │
+│                                                                             │
+│   ┌─────────────┐                                                           │
+│   │  read_file  │───▶ Specific line ranges only                             │
+│   └─────────────┘                                                           │
+│                                                                             │
+│   ┌─────────────┐                                                           │
+│   │    grep     │───▶ Pattern-based narrowing                               │
+│   └─────────────┘                                                           │
+│                                                                             │
+│   ┌─────────────┐                                                           │
+│   │extract_sym  │───▶ Heuristic symbol extraction                           │
+│   └─────────────┘                                                           │
+│                                                                             │
+│   ┌─────────────┐                                                           │
+│   │    stat     │───▶ File size/timestamp checks                            │
+│   └─────────────┘                                                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Evidence Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          EVIDENCE DISCIPLINE                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                    ┌──────────────────────────────┐                         │
+│                    │        ZENO RESPONSE         │                         │
+│                    └──────────────┬───────────────┘                         │
+│                                   │                                         │
+│                    ┌──────────────┴───────────────┐                         │
+│                    ▼              ▼               ▼                         │
+│           ┌──────────────┐ ┌────────────┐ ┌─────────────┐                   │
+│           │ STATE_UPDATE │ │  EVIDENCE  │ │   CLAIMS    │                   │
+│           │    JSON      │ │   LEDGER   │ │   LEDGER    │                   │
+│           └──────┬───────┘ └─────┬──────┘ └──────┬──────┘                   │
+│                  │               │               │                          │
+│                  ▼               ▼               ▼                          │
+│           ┌──────────────────────────────────────────────┐                  │
+│           │              PERSISTENCE LAYER               │                  │
+│           │  .codex/zeno/  or  .claude/zeno/             │                  │
+│           │                                              │                  │
+│           │  ├── state/<thread-id>.json                  │                  │
+│           │  ├── evidence/<thread-id>.jsonl              │                  │
+│           │  ├── claims/<thread-id>.jsonl                │                  │
+│           │  └── snapshots/<thread-id>/<turn-id>.json    │                  │
+│           └──────────────────────────────────────────────┘                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Recursive Inspection Pattern
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      RECURSIVE DECOMPOSITION                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   Complex Query: "How does auth flow from login to API call?"               │
+│                                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  DEPTH 0: Root query                                                │   │
+│   │  └─▶ grep "login" → identify entrypoints                            │   │
+│   │      └─▶ peek auth/login.ts → confirm handler                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                              │                                              │
+│                              ▼                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  DEPTH 1: Sub-query "trace session creation"                        │   │
+│   │  └─▶ read_file auth/session.ts:40-80                                │   │
+│   │      └─▶ grep "SessionStore" → find implementation                  │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                              │                                              │
+│                              ▼                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  DEPTH 2: Sub-query "how does middleware validate?"                 │   │
+│   │  └─▶ read_file middleware/auth.ts:10-45                             │   │
+│   │      └─▶ capsule: "JWT validation using shared secret"              │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                              │                                              │
+│                              ▼                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │  CONSOLIDATE: Assemble cited report from capsules                   │   │
+│   │  └─▶ Claim C1: "Login creates JWT" [E1: auth/login.ts:52-58]        │   │
+│   │  └─▶ Claim C2: "Middleware validates" [E2: middleware/auth.ts:20-35]│   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Core Ideas
+
+- **Externalize context**: Keep the corpus in a REPL server, not in the prompt.
+- **Minimize retrieval**: Prefer `peek` and narrow `read_file` over whole-file loads.
+- **Evidence discipline**: No evidence, no claim.
+- **Recursive inspection**: Summarize slices, then consolidate into a report.
+
+## The Name
+
+Zeno of Elea is the philosopher who turned motion into a puzzle about cutting things in half forever. That's essentially what we do with giant prompts: split, split, split, then stitch the answer back together.
+
+- Zeno's Dichotomy paradox divides a journey in half, then half again, forever
+- The name signals infinite splitting + recursion, matching "unbounded context via recursive inspection"
+- RLMs treat a too-long prompt as an external environment and repeatedly decompose it into smaller subproblems
+
+---
+
+## When to Use Zeno
+
+- **Large repos** (hundreds or thousands of files)
+- **Long logs or traces** where only a few lines matter
+- **Audits** (security, concurrency, dependency wiring) that require citations
+- **Any analysis** where you want reproducible, evidence-backed answers
+
+---
+
+## Budgets and Guardrails (Default Behavior)
+
+Default caps (unless you explicitly ask for deeper coverage):
+
+| Resource | Per Section | Per Answer |
+|:---------|:-----------:|:----------:|
+| Retrieval ops | ≤12 | ≤30 |
+| `read_file` lines | - | ≤2,000 total |
+| `read_file` per call | - | ≤400 lines |
+| `grep` hits | - | ≤200 per call |
+| File capsules | - | ≤12 |
+| Recursion depth | - | ≤2 |
+
+If budgets are hit: stop, summarize, and provide a next retrieval plan.
+
+---
+
+## JSONL REPL Protocol (Summary)
+
 Core operations exposed by the server:
-- `list_files` for discovery.
-- `peek` for tiny previews.
-- `read_file` for specific line ranges.
-- `grep` for pattern-based narrowing.
-- `extract_symbols` for heuristic symbol lists.
-- `stat` for file size and timestamp checks.
+
+| Operation | Purpose |
+|:----------|:--------|
+| `list_files` | Discovery |
+| `peek` | Tiny previews |
+| `read_file` | Specific line ranges |
+| `grep` | Pattern-based narrowing |
+| `extract_symbols` | Heuristic symbol lists |
+| `stat` | File size and timestamp checks |
 
 Requests and responses are one JSON object per line (JSONL). See the protocol docs in `codex/zeno/references/protocol.md` or `claude-code/claude/skills/zeno/references/protocol.md`.
 
-## Output blocks (required for persistence)
+---
+
+## Output Blocks (Required for Persistence)
+
 Each Zeno response ends with three machine-parseable blocks:
+
 ```
 ===ZENO_STATE_UPDATE_JSON===
-{ \"thread_id\":\"...\", \"turn_id\":\"...\", \"mode\":\"read-only\", \"budgets\":{...}, \"high_level_summary\":\"...\" }
+{ "thread_id":"...", "turn_id":"...", "mode":"read-only", "budgets":{...}, "high_level_summary":"..." }
 ===/ZENO_STATE_UPDATE_JSON===
 
 ===ZENO_EVIDENCE_LEDGER_JSONL===
-{\"evidence_id\":\"E1\",\"kind\":\"read\",\"path\":\"...\",\"lines\":[10,44],\"why\":\"...\",\"hash\":\"...\"}
+{"evidence_id":"E1","kind":"read","path":"...","lines":[10,44],"why":"...","hash":"..."}
 ===/ZENO_EVIDENCE_LEDGER_JSONL===
 
 ===ZENO_CLAIM_LEDGER_JSONL===
-{\"claim_id\":\"C1\",\"claim\":\"...\",\"evidence\":[\"E1\"],\"confidence\":\"high\"}
+{"claim_id":"C1","claim":"...","evidence":["E1"],"confidence":"high"}
 ===/ZENO_CLAIM_LEDGER_JSONL===
 ```
+
 These blocks are how Pattern A persists evidence and claims reliably.
 
-## Persistence artifacts (where the receipts live)
-Codex (notify-based):
+---
+
+## Persistence Artifacts (Where the Receipts Live)
+
+**Codex (notify-based):**
 ```
 .codex/zeno/
   state/<thread-id>.json
@@ -110,7 +345,8 @@ Codex (notify-based):
   snapshots/<thread-id>/<turn-id>.json
   notify.log
 ```
-Claude Code (hooks-based):
+
+**Claude Code (hooks-based):**
 ```
 .claude/zeno/
   state/<thread-id>.json
@@ -120,17 +356,26 @@ Claude Code (hooks-based):
   notify.log
 ```
 
-## Security and privacy notes
-- Zeno is read-only by design; the server does not execute arbitrary code.
-- Default OTEL prompt logging is off; enable only if required.
-- Avoid logging secrets in evidence or claims; redact as needed.
+---
 
-## Performance notes
-- Prefer narrow `grep` patterns and short `read_file` slices.
-- Use `stat` to skip huge or generated files.
-- Expect slower runs on very large repos; Zeno favors reliability over speed.
+## Security and Privacy Notes
 
-## Repo layout
+- Zeno is **read-only by design**; the server does not execute arbitrary code
+- Default OTEL prompt logging is **off**; enable only if required
+- Avoid logging secrets in evidence or claims; redact as needed
+
+---
+
+## Performance Notes
+
+- Prefer narrow `grep` patterns and short `read_file` slices
+- Use `stat` to skip huge or generated files
+- Expect slower runs on very large repos; Zeno favors reliability over speed
+
+---
+
+## Repo Layout
+
 ```
 $REPO_ROOT/
   README.md              # This master overview
@@ -142,61 +387,77 @@ $REPO_ROOT/
     claude/              # Visible Claude layout (copy to .claude for runtime)
 ```
 
-## Choose your runtime
+---
+
+## Choose Your Runtime
 
 ### Codex
-Zeno is a Codex skill with an optional notify persistence helper and OTEL telemetry guidance.
-- Package: `codex/zeno/`
-- Docs: `codex/README.md`
 
-Quick start (Codex):
-1) Install the skill:
+Zeno is a Codex skill with an optional notify persistence helper and OTEL telemetry guidance.
+- **Package:** `codex/zeno/`
+- **Docs:** `codex/README.md`
+
+**Quick Start (Codex):**
+
+1. Install the skill:
    - Repo scope: copy `codex/zeno/` to `$REPO_ROOT/.codex/skills/zeno/`
    - User scope: copy `codex/zeno/` to `$CODEX_HOME/skills/zeno/`
-2) Start the JSONL REPL server:
-```
-python3 /ABS/PATH/zeno/scripts/zeno_server.py --root /path/to/repo --log /tmp/zeno_trace.jsonl
-```
-3) (Optional) Enable Pattern A and B in `~/.codex/config.toml`:
-```
-notify = ["python3", "/ABS/PATH/zeno/scripts/notify_persist.py"]
 
-[history]
-max_bytes = 104857600
+2. Start the JSONL REPL server:
+   ```bash
+   python3 /ABS/PATH/zeno/scripts/zeno_server.py --root /path/to/repo --log /tmp/zeno_trace.jsonl
+   ```
 
-[otel]
-environment = "prod"
-exporter = "otlp-http"
-log_user_prompt = false
-```
+3. (Optional) Enable Pattern A and B in `~/.codex/config.toml`:
+   ```toml
+   notify = ["python3", "/ABS/PATH/zeno/scripts/notify_persist.py"]
+
+   [history]
+   max_bytes = 104857600
+
+   [otel]
+   environment = "prod"
+   exporter = "otlp-http"
+   log_user_prompt = false
+   ```
 
 ### Claude Code
+
 Zeno is a Claude Code skill paired with hooks for always-on persistence.
-- Package: `claude-code/claude/skills/zeno/`
-- Docs: `claude-code/README.md`
+- **Package:** `claude-code/claude/skills/zeno/`
+- **Docs:** `claude-code/README.md`
 
-Quick start (Claude Code):
-1) Copy the visible layout into the runtime location:
-```
-rsync -a claude-code/claude/ .claude/
-```
-Or use the helper script:
-```
-./scripts/sync_claude.sh
-```
-2) Merge hooks into settings and refresh:
-   - Merge `.claude/hooks/zeno.hooks.json` into `.claude/settings.json`.
-   - Run `/hooks` to reload.
-3) (Optional) Start the JSONL REPL server (same as Codex).
+**Quick Start (Claude Code):**
 
-## How the Zeno loop works
-1) Plan: identify entrypoints, configs, routing, and DI boundaries.
-2) Retrieve: list, peek, and grep to locate the minimal evidence.
-3) Read: pull small line ranges with read_file.
-4) Recurse: summarize complex slices in capsules.
-5) Consolidate: assemble a cited report and a wiring map.
+1. Copy the visible layout into the runtime location:
+   ```bash
+   rsync -a claude-code/claude/ .claude/
+   ```
+   Or use the helper script:
+   ```bash
+   ./scripts/sync_claude.sh
+   ```
 
-## Evidence and claims
+2. Merge hooks into settings and refresh:
+   - Merge `.claude/hooks/zeno.hooks.json` into `.claude/settings.json`
+   - Run `/hooks` to reload
+
+3. (Optional) Start the JSONL REPL server (same as Codex)
+
+---
+
+## How the Zeno Loop Works
+
+1. **Plan**: Identify entrypoints, configs, routing, and DI boundaries
+2. **Retrieve**: `list`, `peek`, and `grep` to locate minimal evidence
+3. **Read**: Pull small line ranges with `read_file`
+4. **Recurse**: Summarize complex slices in capsules
+5. **Consolidate**: Assemble a cited report and a wiring map
+
+---
+
+## Evidence and Claims
+
 Zeno requires three machine-parseable blocks at the end of each response:
 - `ZENO_STATE_UPDATE_JSON`
 - `ZENO_EVIDENCE_LEDGER_JSONL`
@@ -204,37 +465,57 @@ Zeno requires three machine-parseable blocks at the end of each response:
 
 These are persisted as state and ledgers so that every claim can be traced to evidence.
 
-## Pattern A (persistence)
-- Codex: `notify_persist.py` extracts Zeno blocks and writes `.codex/zeno/` artifacts.
-- Claude Code: hooks write `.claude/zeno/` artifacts on every turn.
+---
 
-## Pattern B (telemetry)
-- Optional OTEL exporter captures tool-level events for replay and audit.
-- Default is privacy-first; prompt logging is opt-in.
+## Pattern A (Persistence)
+
+- **Codex**: `notify_persist.py` extracts Zeno blocks and writes `.codex/zeno/` artifacts
+- **Claude Code**: hooks write `.claude/zeno/` artifacts on every turn
+
+---
+
+## Pattern B (Telemetry)
+
+- Optional OTEL exporter captures tool-level events for replay and audit
+- Default is privacy-first; prompt logging is opt-in
+
+---
 
 ## Testing
-- Codex tests: `codex/zeno/tests/`
-- Claude Code tests: `claude-code/claude/skills/zeno/tests/`
+
+- **Codex tests**: `codex/zeno/tests/`
+- **Claude Code tests**: `claude-code/claude/skills/zeno/tests/`
 
 Example:
-```
+```bash
 cd /ABS/PATH/claude-code/claude/skills/zeno
 python3 -m pytest -q
 ```
 
-## Troubleshooting
-- If ledgers are missing, confirm the Zeno blocks are emitted in the response.
-- Codex: check `.codex/zeno/notify.log`.
-- Claude Code: check `.claude/zeno/notify.log` and `/hooks` registration.
+---
 
-## Next steps
-- See `codex/README.md` for Codex details.
-- See `claude-code/README.md` for Claude Code details.
+## Troubleshooting
+
+- If ledgers are missing, confirm the Zeno blocks are emitted in the response
+- **Codex**: check `.codex/zeno/notify.log`
+- **Claude Code**: check `.claude/zeno/notify.log` and `/hooks` registration
+
+---
+
+## Next Steps
+
+- See `codex/README.md` for Codex details
+- See `claude-code/README.md` for Claude Code details
+
+---
 
 ## Acknowledgments
+
 This project is inspired by and references:
+
 - Zhang et al., "Recursive Language Models" (arXiv:2512.24601v1): https://arxiv.org/abs/2512.24601v1
 - Alex Zhang's reference implementation: https://github.com/alexzhang13/rlm
 - Original announcement thread: https://x.com/a1zhang/status/2007566581409144852?s=46
+- Prime Intellect's RLM research: https://www.primeintellect.ai/blog/rlm
 
 Thank you to Alex Zhang and collaborators for the Zeno concept and open resources that informed this work.

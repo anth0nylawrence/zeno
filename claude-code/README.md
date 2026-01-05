@@ -47,6 +47,8 @@ For the full narrative and diagrams, see ../README.md.
 - Recursive decomposition: large questions become smaller, auditable sub-queries.
 - Deterministic retrieval: JSONL REPL ops keep context small and reproducible.
 
+Reported results are benchmark-specific: OOLONG shows +28.4% (GPT-5) and +33.3% (Qwen3-Coder), and some settings show up to 2x gains vs long-context scaffolds and up to 3x lower cost vs summarization baselines. Results vary by model and task. (Source: https://arxiv.org/abs/2512.24601)
+
 ---
 
 ## Architecture

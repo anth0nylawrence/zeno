@@ -111,7 +111,7 @@ Traditional approaches suffer from "context rot"—as token count increases, the
 
 **IDE copilots** work great for local edits but struggle with architectural questions spanning hundreds of files. They optimize for autocompletion, not audit trails.
 
-**Full-context models** (even with 200k+ tokens) degrade on complex retrieval tasks. Research shows RLMs outperform GPT-5 by 33%+ on long-context benchmarks because recursive inspection beats bulk ingestion.
+**Full-context models** (even with 200k+ tokens) degrade on complex retrieval tasks. Reported results are benchmark-specific: OOLONG shows +28.4% (GPT-5) and +33.3% (Qwen3-Coder), and some settings show up to 2x gains vs long-context scaffolds and up to 3x lower cost vs summarization baselines. Results vary by model and task. (Source: https://arxiv.org/abs/2512.24601)
 
 **Zeno** gives you: every claim traced to `file:lines`, strict budgets preventing runaway costs, and reproducible analysis sessions persisted to disk.
 

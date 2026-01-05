@@ -1,6 +1,13 @@
-<p align="center"><img src="../../../../assets/zeno.png" width="50%" alt="Zeno"></p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
+[![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)  [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)
 
 # Demo Repo (Small)
+
+<p align="center"><img src="../../../../assets/zeno.png" width="50%" alt="Zeno"></p>
+
+## Table of Contents
+- [Acknowledgments](#acknowledgments)
 
 This tiny repo exists for golden tests and example runs.
 

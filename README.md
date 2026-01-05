@@ -1,6 +1,33 @@
-<p align="center"><img src="assets/zeno.png" width="50%" alt="Zeno"></p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
+[![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)  [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)
 
 # Zeno
+
+<p align="center"><img src="assets/zeno.png" width="50%" alt="Zeno"></p>
+
+## Table of Contents
+- [Introduction](#introduction)
+- [What Zeno is (and is not)](#what-zeno-is-and-is-not)
+- [Core ideas](#core-ideas)
+- [Why Zeno?](#why-zeno)
+- [When to use Zeno](#when-to-use-zeno)
+- [Budgets and guardrails (default behavior)](#budgets-and-guardrails-default-behavior)
+- [JSONL REPL protocol (summary)](#jsonl-repl-protocol-summary)
+- [Output blocks (required for persistence)](#output-blocks-required-for-persistence)
+- [Persistence artifacts (where the receipts live)](#persistence-artifacts-where-the-receipts-live)
+- [Security and privacy notes](#security-and-privacy-notes)
+- [Performance notes](#performance-notes)
+- [Repo layout](#repo-layout)
+- [Choose your runtime](#choose-your-runtime)
+- [How the Zeno loop works](#how-the-zeno-loop-works)
+- [Evidence and claims](#evidence-and-claims)
+- [Pattern A (persistence)](#pattern-a-persistence)
+- [Pattern B (telemetry)](#pattern-b-telemetry)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+- [Next steps](#next-steps)
+- [Acknowledgments](#acknowledgments)
 
 ## Introduction
 Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.

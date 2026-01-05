@@ -1,12 +1,25 @@
-<p align="center"><img src="../assets/zeno.png" width="50%" alt="Zeno"></p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
+[![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)  [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)
 
 # Zeno for Claude Code (Project Scope)
 
-For the full project overview, see `../README.md`.
+<p align="center"><img src="../assets/zeno.png" width="50%" alt="Zeno"></p>
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Why Zeno?](#why-zeno)
+- [Folder layout](#folder-layout)
+- [Quick start](#quick-start)
+- [Verification](#verification)
+- [Acknowledgments](#acknowledgments)
+
 
 ## Introduction
 Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
 Technical: This repo stores the Claude Code layout in `claude/` for visibility. Claude Code itself expects `.claude/` at runtime, so copy `claude/` to `.claude/` before use.
+
+For the full project overview, see `../README.md`.
 
 ## Why Zeno?
 ELI5: Zeno is the philosopher who turned motion into a puzzle about cutting things in half forever. That is basically what we do with giant prompts: split, split, split, then stitch the answer back together.

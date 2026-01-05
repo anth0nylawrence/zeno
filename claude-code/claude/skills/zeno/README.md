@@ -1,6 +1,32 @@
-<p align="center"><img src="../../../../assets/zeno.png" width="50%" alt="Zeno"></p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
+[![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)  [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)
 
 # Zeno Skill for Claude Code
+
+<p align="center"><img src="../../../../assets/zeno.png" width="50%" alt="Zeno"></p>
+
+## Table of Contents
+- [Introduction](#introduction)
+- [What you are installing](#what-you-are-installing)
+- [Install locations (Claude Code discovery)](#install-locations-claude-code-discovery)
+- [Quick start](#quick-start)
+- [Pattern A: hook-based persistence (always-on)](#pattern-a-hook-based-persistence-always-on)
+- [Hook payload (stdin JSON + transcript_path)](#hook-payload-stdin-json-transcriptpath)
+- [CLI checkpoint signal](#cli-checkpoint-signal)
+- [Context bridge (carry forward Zeno state)](#context-bridge-carry-forward-zeno-state)
+- [Flags and help](#flags-and-help)
+- [Pattern B: Claude Code telemetry (OTEL)](#pattern-b-claude-code-telemetry-otel)
+- [Settings example (hooks + env)](#settings-example-hooks-env)
+- [Verification playbook](#verification-playbook)
+- [Non-interactive mode](#non-interactive-mode)
+- [What the skill enforces](#what-the-skill-enforces)
+- [Scripts included](#scripts-included)
+- [References](#references)
+- [Tests](#tests)
+- [Security and privacy](#security-and-privacy)
+- [Troubleshooting](#troubleshooting)
+- [Acknowledgments](#acknowledgments)
 
 ## Introduction
 Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.

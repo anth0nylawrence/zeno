@@ -1,12 +1,41 @@
-<p align="center"><img src="../assets/zeno.png" width="50%" alt="Zeno"></p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
+[![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)  [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)
 
 # Zeno Skill - Detailed Documentation
 
-For the full project overview, see `../README.md`.
+<p align="center"><img src="../assets/zeno.png" width="50%" alt="Zeno"></p>
+
+## Table of Contents
+- [Introduction](#introduction)
+- [What this skill is](#what-this-skill-is)
+- [Why it matters](#why-it-matters)
+- [Why Zeno?](#why-zeno)
+- [How it works (high-level flow)](#how-it-works-high-level-flow)
+- [Components](#components)
+- [The Zeno loop (detailed)](#the-zeno-loop-detailed)
+- [Evidence discipline](#evidence-discipline)
+- [Determinism and safety](#determinism-and-safety)
+- [How to use it with Codex (step-by-step)](#how-to-use-it-with-codex-step-by-step)
+- [CLI checkpoint signal](#cli-checkpoint-signal)
+- [Context bridge](#context-bridge)
+- [Flags and help](#flags-and-help)
+- [Example workflow](#example-workflow)
+- [Trajectory logs and visualization](#trajectory-logs-and-visualization)
+- [Notify payload (what the hook receives)](#notify-payload-what-the-hook-receives)
+- [Non-interactive mode](#non-interactive-mode)
+- [How this transforms coding agents](#how-this-transforms-coding-agents)
+- [Limitations and tradeoffs](#limitations-and-tradeoffs)
+- [Extending the system](#extending-the-system)
+- [Folder layout in this directory](#folder-layout-in-this-directory)
+- [Acknowledgments](#acknowledgments)
+
 
 ## Introduction
 Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
 Technical: This is a Codex skill that implements a recursive retrieval loop. It stores large corpora outside the model context, pulls small slices on demand, and optionally recurses on slices for focused summaries. It avoids context bloat and enforces evidence-backed analysis.
+
+For the full project overview, see `../README.md`.
 
 ## What this skill is
 ELI5: It is a set of instructions that teach Codex to read huge codebases or documents by taking tiny bites instead of swallowing everything at once.

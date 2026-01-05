@@ -1,6 +1,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
 [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)  [![Built with AI](https://img.shields.io/badge/Built%20with-AI%20%F0%9F%A4%96-blueviolet)](https://claude.ai/)
+[![Docs](https://img.shields.io/badge/Docs-Read%20the%20manual-brightgreen)](../../../../README.md)
+[![JSONL](https://img.shields.io/badge/Protocol-JSONL-1f6feb)](#jsonl-repl-protocol-summary)
+[![OpenTelemetry](https://img.shields.io/badge/Telemetry-OpenTelemetry-8A2BE2)](../../../../codex/zeno/references/otel.md)
+[![Codex Compatible](https://img.shields.io/badge/Codex-Compatible-blue)](https://platform.openai.com/)
+[![Read-Only](https://img.shields.io/badge/Mode-Read--Only-ff69b4)](#budgets-and-guardrails-default-behavior)
+[![Evidence-First](https://img.shields.io/badge/Policy-Evidence--First-2ea44f)](#output-blocks-required-for-persistence)
 
 # Demo Repo (Small)
 
@@ -8,6 +14,9 @@
 
 ## Table of Contents
 - [Acknowledgments](#acknowledgments)
+- [JSONL REPL protocol (summary)](#jsonl-repl-protocol-summary)
+- [Budgets and guardrails (default behavior)](#budgets-and-guardrails-default-behavior)
+- [Output blocks (required for persistence)](#output-blocks-required-for-persistence)
 
 This tiny repo exists for golden tests and example runs.
 

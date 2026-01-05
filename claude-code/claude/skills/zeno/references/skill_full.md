@@ -1,6 +1,7 @@
 ---
 name: zeno
-description: Evidence-first, read-only Zeno workflow for huge corpora via an external JSONL REPL server (list_files/read_file/peek/grep/extract_symbols). Minimize context bloat, prevent drift, and produce a cited architecture + audit report.
+description: Persistent structured memory + telemetry + audit trail for Claude Code sessions. Use when the user wants automated capture, durable context, and standardized turn-by-turn logging.
+allowed-tools: Read, Write, Bash(python:*), Bash(jq:*)
 ---
 
 # Zeno -- Read-only, Evidence-first
@@ -8,16 +9,16 @@ description: Evidence-first, read-only Zeno workflow for huge corpora via an ext
 ## Core idea (1 paragraph)
 The corpus (repo/docs/logs) is too large to paste into the model. Treat it as external environment state accessed through a JSONL REPL server. Retrieve only the minimum evidence needed (paths + small line ranges), optionally "recursing" by producing per-slice capsules, then consolidate into a report.
 
-## How this skill is triggered (and when to use it)
-Zeno activates when the user explicitly asks for Zeno or names a mode. Common triggers:
-- "Use Zeno codebase-archaeology to trace <symbol> across the repo."
-- "Run Zeno security-audit on src/ and build evidence chains."
-- "Use Zeno architecture-mapping to document entrypoints and lifecycle."
-- "Zeno pr-review these changed files: ... with downstream impact."
-- "Zeno skill-generation on this repo and draft SKILL.md."
-- "Zeno deep-research on this project question: ..."
+## Claude Code mental model (Skill vs Hooks)
+- Skill = policy and operating manual (this document).
+- Hooks = always-on automation (persistence, capture, injection).
+If the user expects standardized memory every turn, the hooks must be installed and verified.
 
-Full use cases and mode details are defined in `references/modes.md`.
+## Hook configuration (required for automation)
+- This repo stores the files under `claude/` for visibility; copy to `.claude/` before running hooks.
+- Hook definitions live in `.claude/hooks/zeno.hooks.json` (after copying).
+- Merge them into `.claude/settings.json` or `~/.claude/settings.json`.
+- Refresh hooks using `/hooks` after changes.
 
 ## Non-negotiables (hard guardrails)
 - READ-ONLY: never modify files. Never propose "just change X" unless user explicitly requests edits later.
@@ -209,7 +210,7 @@ When a mode is active, include these extra sections in the report. These do not 
 ---
 
 ## Mandatory end-of-turn blocks (Pattern A)
-At the end of every response while this skill is active, append the three machine-parseable blocks below. These are consumed by `notify_persist.py` on `agent-turn-complete` to persist state, evidence, and claims.
+At the end of every response while this skill is active, append the three machine-parseable blocks below. The Claude Code `Stop` hook parses the transcript and persists state, evidence, and claims from these blocks.
 
 Hard rules:
 - The blocks must be valid JSON/JSONL with no commentary inside.
@@ -238,9 +239,16 @@ If you are missing any field, leave it as an empty string or empty list rather t
 
 ---
 
-## Pattern A persistence (notify checkpoints)
-The notify hook writes state and ledgers after every turn. This is the authoritative checkpoint when telemetry is unavailable.
-Follow the block format exactly so `notify_persist.py` can extract and persist data to `.codex/zeno/` under `state/`, `evidence/`, and `claims/`.
+## Pattern A persistence (Claude Code hooks)
+Hooks are the always-on engine. They run every turn and store a durable audit trail even if telemetry is down.
+Follow the block format exactly so the `Stop` hook (`scripts/stop.py`) can extract and persist data to `.claude/zeno/` under `state/`, `evidence/`, and `claims/`.
+
+Hook responsibilities:
+- SessionStart: optional minimal header (once per session).
+- UserPromptSubmit: injects the memory/context bridge into the prompt.
+- Stop: persists the turn record + ledgers, appends `notify.log`.
+- PreCompact: snapshots state before compaction.
+- PostToolUse (optional): captures tool outputs/diffs for audit.
 
 ---
 
@@ -250,15 +258,22 @@ Default privacy: `otel.log_user_prompt = false` unless the user explicitly asks 
 
 ---
 
-# NON-NEGOTIABLE: Read the full manual
-Before using Zeno in a real task, you MUST read the full manual and follow it. This SKILL file is intentionally dense; the references are the source of truth.
+## Hook verification playbook (required)
+1) Verify hooks are registered: run `/hooks` and confirm the Zeno hooks are listed.
+2) Verify hooks fire: run `claude --debug` and confirm each hook executes without errors.
+3) Verify transcript parsing: ensure hooks read `payload["transcript_path"]` and update `.claude/zeno/`.
+4) Verify injection: confirm UserPromptSubmit output appears in the prompt context.
+5) Verify stop-loop guard: hooks must be fast and fail-open to avoid recursion or timeouts.
 
-Read these in order:
-- `references/modes.md` (mode specs and required add-ons)
-- `references/operator_instructions_and_review.md` (operator-grade rules)
-- `references/recipes.md` (copy/paste retrieval plans)
-- `references/protocol.md` (JSONL REPL protocol)
-- `references/security.md` and `references/otel.md`
+## Failure policy (fail-open)
+- Persistence must never block the user or crash the session.
+- If persistence fails, UserPromptSubmit should inject a short warning that the last write failed.
+- Always continue the session; do not halt or retry indefinitely.
+
+## Hook I/O contract (Claude Code)
+- Hooks receive JSON via stdin: `payload = json.load(sys.stdin)`.
+- Use `payload["transcript_path"]` when present.
+- Only SessionStart/UserPromptSubmit stdout is injected into context.
 
 ---
 

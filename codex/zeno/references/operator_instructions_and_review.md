@@ -41,7 +41,19 @@ Stop retrieval and write the report when:
 
 Always include Open Questions and a Next Retrieval Plan.
 
-### A5) Failure-mode playbooks
+### A5) Mode selection (required)
+ELI5: Pick the right mode so the report matches the user's goal.
+Technical:
+- codebase-archaeology: trace symbol definitions and usages with file:line citations.
+- security-audit: pattern-based vulnerability triage with evidence chains.
+- architecture-mapping: lifecycle and boundary mapping.
+- pr-review: impact-focused review of changed files.
+- skill-generation: draft SKILL.md from a new tool repo with citations.
+- deep-research: evidence-first research report without hallucination.
+
+If the mode requires inputs (symbol name, changed_files, research question), ask for them before retrieval.
+
+### A6) Failure-mode playbooks
 ELI5: If you get stuck, do a small, predictable move.
 Technical:
 - grep truncated -> narrow by paths and use a more specific pattern.

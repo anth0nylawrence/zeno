@@ -57,6 +57,66 @@ Requests (JSONL):
 
 Then read main.rs and lib.rs slices to build the module map.
 
+## Codebase archaeology (trace symbol usage)
+Goal: find definition and usage of a symbol across a large repo.
+
+Requests (JSONL):
+```json
+{"id":"arch-1","op":"list_files","args":{"glob":"**/*.{py,js,ts,go,java,rb,swift,rs}","max":400}}
+{"id":"arch-2","op":"grep","args":{"pattern":"def <SYMBOL>","paths":["**/*.py"],"max_hits":50}}
+{"id":"arch-3","op":"grep","args":{"pattern":"<SYMBOL>","paths":["**/*.{py,js,ts}"],"max_hits":200}}
+```
+
+Then read the definition block and sample representative call sites.
+
+## Security audit (pattern triage)
+Goal: scan for common risky patterns with evidence.
+
+Requests (JSONL):
+```json
+{"id":"sec-1","op":"grep","args":{"pattern":"eval(","paths":["**/*.js","**/*.ts"],"max_hits":50}}
+{"id":"sec-2","op":"grep","args":{"pattern":"subprocess","paths":["**/*.py"],"max_hits":50}}
+{"id":"sec-3","op":"grep","args":{"pattern":"yaml.load","paths":["**/*.py"],"max_hits":50}}
+{"id":"sec-4","op":"grep","args":{"pattern":"jwt.decode","paths":["**/*.py","**/*.js","**/*.ts"],"max_hits":50}}
+```
+
+Then read the minimal context around each hit and build Source -> Validation -> Sink chains where visible.
+
+## PR review (impact tracing)
+Goal: review a set of changed files with usage tracing.
+
+Requests (JSONL):
+```json
+{"id":"pr-1","op":"read_file","args":{"path":"<CHANGED_FILE>","start_line":1,"end_line":200,"max_lines":200}}
+{"id":"pr-2","op":"grep","args":{"pattern":"<CHANGED_SYMBOL>","paths":["**/*.{py,js,ts,go,java,rb,swift,rs}"],"max_hits":100}}
+```
+
+Then read downstream call sites to assess impact.
+
+## Skill generation (draft SKILL.md)
+Goal: draft a SKILL.md from a new tool repo with evidence.
+
+Requests (JSONL):
+```json
+{"id":"skill-1","op":"list_files","args":{"glob":"**/README*","max":50}}
+{"id":"skill-2","op":"list_files","args":{"glob":"**/*.{md,txt}","max":200}}
+{"id":"skill-3","op":"grep","args":{"pattern":"Usage","paths":["**/*.md"],"max_hits":50}}
+```
+
+Then read the usage sections and CLI entrypoints to draft SKILL.md with citations.
+
+## Deep research (evidence-first)
+Goal: answer a large research question without hallucination.
+
+Requests (JSONL):
+```json
+{"id":"research-1","op":"list_files","args":{"glob":"**/*.{md,txt}","max":200}}
+{"id":"research-2","op":"grep","args":{"pattern":"<KEY_TERM>","paths":["**/*.{md,txt}"],"max_hits":100}}
+{"id":"research-3","op":"read_file","args":{"path":"<DOC_PATH>","start_line":1,"end_line":160,"max_lines":160}}
+```
+
+Then consolidate claims with an evidence ledger.
+
 ## Acknowledgments
 This skill is inspired by and references:
 - Zhang et al., "Recursive Language Models" (arXiv:2512.24601v1): https://arxiv.org/abs/2512.24601v1

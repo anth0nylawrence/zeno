@@ -19,6 +19,8 @@
 - [Architecture](#architecture)
 - [Core Ideas](#core-ideas)
 - [When to Use Zeno](#when-to-use-zeno)
+- [Modes](#modes)
+- [Triggering Zeno (Natural Language Examples)](#triggering-zeno-natural-language-examples)
 - [Budgets and Guardrails](#budgets-and-guardrails-default-behavior)
 - [JSONL REPL Protocol](#jsonl-repl-protocol-summary)
 - [Output Blocks](#output-blocks-required-for-persistence)
@@ -278,6 +280,41 @@ Zeno of Elea is the philosopher who turned motion into a puzzle about cutting th
 
 ---
 
+## Modes
+
+Zeno ships with six explicit operating modes. Each mode has a detailed playbook and output add-ons in `codex/zeno/references/modes.md` and `claude-code/claude/skills/zeno/references/modes.md`.
+
+- **codebase-archaeology**: Trace where a function or symbol is defined and used across a monorepo with file:line citations.
+- **security-audit**: Systematically scan for vulnerability patterns and build evidence chains.
+- **architecture-mapping**: Recursively map entrypoints, lifecycle, and boundaries without forgetting context.
+- **pr-review**: Review changed files and trace downstream impact in large repos.
+- **skill-generation**: Analyze a tool repo and draft SKILL.md with accurate, cited docs.
+- **deep-research**: Evidence-first research mode for large projects and specs.
+
+Mode helper CLI (optional):
+```bash
+python3 codex/zeno/scripts/zeno_modes.py list
+python3 codex/zeno/scripts/zeno_modes.py plan --mode codebase-archaeology --symbol MyFunc --format jsonl
+```
+
+---
+
+## Triggering Zeno (Natural Language Examples)
+
+Zeno activates when you explicitly ask for it or name a mode. These prompts work in Codex and Claude Code.
+
+- codebase-archaeology: `Use Zeno codebase-archaeology to trace MyFunc across the repo with file:line citations.`\n- security-audit: `Run Zeno security-audit on src/ and build evidence chains for any risky patterns.`\n- architecture-mapping: `Use Zeno architecture-mapping to document entrypoints, routing, and lifecycle for the API service.`\n- pr-review: `Zeno pr-review these changed files: src/api.py, src/routes.py. Show downstream impact.`\n- skill-generation: `Use Zeno skill-generation on this repo and draft a SKILL.md with citations.`\n- deep-research: `Zeno deep-research this project and answer: how does auth flow through the system?`
+- codebase-archaeology: `Use Zeno codebase-archaeology to trace MyFunc across the repo with file:line citations.`
+- security-audit: `Run Zeno security-audit on src/ and build evidence chains for any risky patterns.`
+- architecture-mapping: `Use Zeno architecture-mapping to document entrypoints, routing, and lifecycle for the API service.`
+- pr-review: `Zeno pr-review these changed files: src/api.py, src/routes.py. Show downstream impact.`
+- skill-generation: `Use Zeno skill-generation on this repo and draft a SKILL.md with citations.`
+- deep-research: `Zeno deep-research this project and answer: how does auth flow through the system?`
+
+If a mode needs inputs, include them in the request (symbol name, changed files, or research question).
+
+---
+
 ## Budgets and Guardrails (Default Behavior)
 
 Default caps (unless you explicitly ask for deeper coverage):
@@ -438,9 +475,13 @@ Zeno is a Claude Code skill paired with hooks for always-on persistence.
    ./scripts/sync_claude.sh
    ```
 
-2. Merge hooks into settings and refresh:
-   - Merge `.claude/hooks/zeno.hooks.json` into `.claude/settings.json`
+2. Use the preconfigured settings (fast path) and refresh:
+   - `.claude/settings.json` is already included when you copy `claude-code/claude/` to `.claude/`
    - Run `/hooks` to reload
+
+   Manual merge option:
+   - Merge `.claude/hooks/zeno.hooks.json` into `.claude/settings.json`
+   - Optionally merge `.claude/settings.example.json` for OTEL env settings
 
 3. (Optional) Start the JSONL REPL server (same as Codex)
 

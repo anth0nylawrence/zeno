@@ -20,6 +20,8 @@
 - [Core Ideas](#core-ideas)
 - [The Name](#the-name)
 - [When to Use Zeno](#when-to-use-zeno)
+- [Modes](#modes)
+- [Triggering Zeno (Natural Language Examples)](#triggering-zeno-natural-language-examples)
 - [Budgets and Guardrails (Default Behavior)](#budgets-and-guardrails-default-behavior)
 - [JSONL REPL Protocol (Summary)](#jsonl-repl-protocol-summary)
 - [Output Blocks (Required for Persistence)](#output-blocks-required-for-persistence)
@@ -97,6 +99,40 @@ Zeno of Elea framed motion as repeated halving. That mirrors recursive inspectio
 - Long logs or traces where only a few lines matter
 - Audits (security, concurrency, dependency wiring) that require citations
 - Any analysis where you want reproducible, evidence-backed answers
+
+---
+
+## Modes
+
+Zeno ships with six explicit operating modes. Each mode has a detailed playbook and output add-ons in `claude-code/claude/skills/zeno/references/modes.md`.
+
+- codebase-archaeology: Trace where a function or symbol is defined and used across a monorepo with file:line citations.
+- security-audit: Systematically scan for vulnerability patterns and build evidence chains.
+- architecture-mapping: Recursively map entrypoints, lifecycle, and boundaries without forgetting context.
+- pr-review: Review changed files and trace downstream impact in large repos.
+- skill-generation: Analyze a tool repo and draft SKILL.md with accurate, cited docs.
+- deep-research: Evidence-first research mode for large projects and specs.
+
+Mode helper CLI (optional):
+```bash
+python3 claude-code/claude/skills/zeno/scripts/zeno_modes.py list
+python3 claude-code/claude/skills/zeno/scripts/zeno_modes.py plan --mode codebase-archaeology --symbol MyFunc --format jsonl
+```
+
+---
+
+## Triggering Zeno (Natural Language Examples)
+
+Zeno activates when you explicitly ask for it or name a mode.
+
+- codebase-archaeology: `Use Zeno codebase-archaeology to trace MyFunc across the repo with file:line citations.`
+- security-audit: `Run Zeno security-audit on src/ and build evidence chains for any risky patterns.`
+- architecture-mapping: `Use Zeno architecture-mapping to document entrypoints, routing, and lifecycle for the API service.`
+- pr-review: `Zeno pr-review these changed files: src/api.py, src/routes.py. Show downstream impact.`
+- skill-generation: `Use Zeno skill-generation on this repo and draft a SKILL.md with citations.`
+- deep-research: `Zeno deep-research this project and answer: how does auth flow through the system?`
+
+If a mode needs inputs, include them in the request (symbol name, changed files, or research question).
 
 ---
 
@@ -202,11 +238,13 @@ ELI5: Turn on the hooks, then start using the skill.
 Technical:
 1) Copy the visible folder into the runtime location:
    - `rsync -a claude/ .claude/`
-2) Copy hooks config into your settings:
+2) Use the preconfigured settings file (fast path):
+   - `.claude/settings.json` is already included when you copy `claude/` to `.claude/`.
+3) If you want to merge manually:
    - See `.claude/hooks/zeno.hooks.json` for the exact hook commands.
    - Merge the contents into `.claude/settings.json` or `~/.claude/settings.json`.
-3) Refresh hooks in Claude Code: run `/hooks` and confirm Zeno hooks are listed.
-4) (Optional) Start the JSONL REPL server for retrieval:
+4) Refresh hooks in Claude Code: run `/hooks` and confirm Zeno hooks are listed.
+5) (Optional) Start the JSONL REPL server for retrieval:
 ```bash
 python3 .claude/skills/zeno/scripts/zeno_server.py --root /path/to/repo --log /tmp/zeno_trace.jsonl
 ```

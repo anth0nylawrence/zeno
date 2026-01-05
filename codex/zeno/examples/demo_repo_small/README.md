@@ -1,4 +1,4 @@
-<img src="../../../../assets/zeno.png" width="50%" alt="Zeno">
+<p align="center"><img src="../../../../assets/zeno.png" width="50%" alt="Zeno"></p>
 
 # Demo Repo (Small)
 

@@ -1,0 +1,12 @@
+[Unit]
+Description=Zeno OpenTelemetry Collector
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/otelcol-contrib --config /ABS/PATH/zeno/configs/otel-collector.yaml
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

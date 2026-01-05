@@ -1,0 +1,2 @@
+{"timestamp":"2026-01-04T18:11:30Z","thread_id":"T1","turn_id":"U1","event":"tool_call","tool":"list_files","args":{"glob":"**/*.py","max":50}}
+{"timestamp":"2026-01-04T18:11:31Z","thread_id":"T1","turn_id":"U1","event":"tool_result","tool":"list_files","result_count":12,"truncated":false}

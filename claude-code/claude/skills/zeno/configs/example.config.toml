@@ -1,0 +1,12 @@
+# Legacy Codex config (not used by Claude Code).
+# Claude Code uses .claude/settings.json and environment variables instead.
+
+notify = ["python3", "/ABS/PATH/zeno/scripts/notify_persist.py"]
+
+[history]
+max_bytes = 104857600 # 100 MiB (drops oldest entries when compacting)
+
+[otel]
+environment = "prod"
+exporter = "otlp-http"
+log_user_prompt = false

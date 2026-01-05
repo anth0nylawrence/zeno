@@ -1,0 +1,25 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+      grpc:
+
+processors:
+  batch:
+
+exporters:
+  file:
+    path: ${env:HOME}/.codex/otel/zeno-otel.jsonl
+  logging:
+    loglevel: info
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file]

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.zeno.otelcollector</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/otelcol-contrib</string>
+    <string>--config</string>
+    <string>/ABS/PATH/zeno/configs/otel-collector.yaml</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/zeno-otelcollector.out</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/zeno-otelcollector.err</string>
+</dict>
+</plist>

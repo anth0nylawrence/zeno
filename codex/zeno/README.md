@@ -1,4 +1,4 @@
-![Zeno](../../assets/zeno.png)
+<img src="../../assets/zeno.png" width="50%" alt="Zeno">
 
 # Zeno Skill
 

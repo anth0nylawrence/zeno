@@ -124,12 +124,12 @@ python3 codex/zeno/scripts/zeno_modes.py plan --mode codebase-archaeology --symb
 
 Zeno activates when you explicitly ask for it or name a mode.
 
-- codebase-archaeology: `Use Zeno codebase-archaeology to trace MyFunc across the repo with file:line citations.`
-- security-audit: `Run Zeno security-audit on src/ and build evidence chains for any risky patterns.`
-- architecture-mapping: `Use Zeno architecture-mapping to document entrypoints, routing, and lifecycle for the API service.`
-- pr-review: `Zeno pr-review these changed files: src/api.py, src/routes.py. Show downstream impact.`
-- skill-generation: `Use Zeno skill-generation on this repo and draft a SKILL.md with citations.`
-- deep-research: `Zeno deep-research this project and answer: how does auth flow through the system?`
+- codebase-archaeology: "Use Zeno codebase-archaeology to trace MyFunc across the repo with file:line citations."
+- security-audit: "Run Zeno security-audit on src/ and build evidence chains for any risky patterns."
+- architecture-mapping: "Use Zeno architecture-mapping to document entrypoints, routing, and lifecycle for the API service."
+- pr-review: "Zeno pr-review these changed files: src/api.py, src/routes.py. Show downstream impact."
+- skill-generation: "Use Zeno skill-generation on this repo and draft a SKILL.md with citations."
+- deep-research: "Zeno deep-research this project and answer: how does auth flow through the system?"
 
 If a mode needs inputs, include them in the request (symbol name, changed files, or research question).
 

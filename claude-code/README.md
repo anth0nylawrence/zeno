@@ -4,8 +4,8 @@
 
 For the full project overview, see `../README.md`.
 
-## Plain-English context
-ELI5: This folder contains the Claude Code version of the Zeno skill. Hooks do the automatic saving, and the skill file tells Claude how to behave.
+## Introduction
+Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
 Technical: This repo stores the Claude Code layout in `claude/` for visibility. Claude Code itself expects `.claude/` at runtime, so copy `claude/` to `.claude/` before use.
 
 ## Why Zeno?

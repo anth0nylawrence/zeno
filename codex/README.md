@@ -4,8 +4,8 @@
 
 For the full project overview, see `../README.md`.
 
-## Plain-English context (start here)
-ELI5: Imagine you have a giant library and a tiny backpack. You cannot carry all the books at once, so you keep the library on a shelf (an external REPL server) and only grab the exact pages you need. This skill tells Codex how to do that safely and consistently.
+## Introduction
+Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
 Technical: This is a Codex skill that implements a recursive retrieval loop. It stores large corpora outside the model context, pulls small slices on demand, and optionally recurses on slices for focused summaries. It avoids context bloat and enforces evidence-backed analysis.
 
 ## What this skill is

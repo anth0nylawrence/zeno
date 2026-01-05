@@ -2,8 +2,8 @@
 
 # Zeno Skill for Claude Code
 
-## Plain-English context
-ELI5: This skill teaches Claude to read huge codebases in tiny bites and keep receipts, but the always-on saving is done by hooks that run every turn.
+## Introduction
+Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
 Technical: This repo stores the Claude Code package under `claude/` for visibility on GitHub. Claude Code itself expects `.claude/`, so copy `claude/` to `.claude/` before you run the hooks.
 
 ## What you are installing

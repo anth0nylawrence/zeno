@@ -2,8 +2,8 @@
 
 # Zeno
 
-## Plain-English context (start here)
-ELI5: Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
+## Introduction
+Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
 Technical: Zeno is an evidence-first, read-only workflow for large corpora. It pairs a JSONL REPL server (list_files/read_file/peek/grep/extract_symbols) with strict budgets and a claim-evidence ledger. It supports both Codex and Claude Code with persistence (Pattern A) and optional telemetry (Pattern B).
 
 ## What Zeno is (and is not)

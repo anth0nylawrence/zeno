@@ -2,8 +2,8 @@
 
 # Zeno Skill
 
-## Plain-English context
-ELI5: This skill lets a coding agent read a huge codebase without stuffing the whole thing into its memory. It keeps the big files in a separate "library" and only checks out the exact pages it needs, then writes down receipts for every claim.
+## Introduction
+Zeno is a way to read huge codebases without stuffing them into the model's memory. It keeps the big files outside the model, pulls only the few lines needed, and keeps receipts so every claim can be traced back to evidence.
 Technical: This is a production-grade Codex skill for evidence-first, read-only analysis over large corpora using a JSONL REPL server, per-turn persistence (Pattern A), and OpenTelemetry telemetry (Pattern B).
 
 ## What you are installing

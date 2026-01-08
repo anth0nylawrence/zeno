@@ -250,14 +250,15 @@ Technical:
 ELI5: Turn on the hooks, then start using the skill.
 Technical:
 1) Copy the visible folder into the runtime location:
-   - `rsync -a claude/ .claude/`
+   - `rsync -a claude-code/claude/ .claude/`
 2) Use the preconfigured settings file (fast path):
    - `.claude/settings.json` is already included when you copy `claude/` to `.claude/`.
 3) If you want to merge manually:
    - See `.claude/hooks/zeno.hooks.json` for the exact hook commands.
    - Merge the contents into `.claude/settings.json` or `~/.claude/settings.json`.
 4) Refresh hooks in Claude Code: run `/hooks` and confirm Zeno hooks are listed.
-5) (Optional) Start the JSONL REPL server for retrieval:
+5) If `CLAUDE_PROJECT_DIR` is not set, hooks fall back to `$PWD`; run Claude Code from the repo root or set the env var.
+6) (Optional) Start the JSONL REPL server for retrieval:
 ```bash
 python3 .claude/skills/zeno/scripts/zeno_server.py --root /path/to/repo --log /tmp/zeno_trace.jsonl
 ```

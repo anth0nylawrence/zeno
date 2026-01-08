@@ -12,7 +12,7 @@ Technical:
 ```toml
 [otel]
 environment = "prod"
-exporter = "otlp-http"
+exporter = { type = "otlp-http" }
 log_user_prompt = false
 ```
 

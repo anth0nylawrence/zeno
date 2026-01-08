@@ -21,7 +21,7 @@ Technical:
 ELI5: The helpers are installed but not running.
 Technical:
 - Run `claude --debug` and look for hook execution lines.
-- Ensure `CLAUDE_PROJECT_DIR` is set in the hook command paths.
+- Ensure `CLAUDE_PROJECT_DIR` is set in the hook command paths, or run Claude Code from the repo root so `$PWD` resolves to your project.
 - Re-run `/hooks` after any edits to settings or hook configs.
 
 ---

@@ -346,7 +346,7 @@ max_bytes = 104857600 # 100 MiB (drops oldest entries when compacting)
 
 [otel]
 environment = "prod"
-exporter = "otlp-http"
+exporter = { type = "otlp-http" }
 log_user_prompt = false  # privacy default
 ```
 

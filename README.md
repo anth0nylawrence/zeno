@@ -466,7 +466,7 @@ Zeno is a Codex skill with an optional notify persistence helper and OTEL teleme
 
    [otel]
    environment = "prod"
-   exporter = "otlp-http"
+  exporter = { type = "otlp-http" }
    log_user_prompt = false
    ```
 

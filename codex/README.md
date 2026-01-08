@@ -351,7 +351,7 @@ max_bytes = 104857600
 
 [otel]
 environment = "prod"
-exporter = "otlp-http"
+exporter = { type = "otlp-http" }
 log_user_prompt = false
 ```
 2) Start the collector from `zeno/configs/otel-collector.yaml`.

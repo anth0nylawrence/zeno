@@ -234,7 +234,7 @@ claude/               # Repo-visible Claude Code layout (copy to .claude/)
 
 ## Quick start
 1) Copy the visible folder into the runtime location:
-   - `rsync -a claude/ .claude/`
+   - `rsync -a claude-code/claude/ .claude/`
    - or from repo root: `./scripts/sync_claude.sh`
 2) Use the preconfigured settings file (fast path):
    - copy the repo-provided `claude/settings.json` into `.claude/settings.json`
@@ -242,6 +242,7 @@ claude/               # Repo-visible Claude Code layout (copy to .claude/)
    - merge `.claude/hooks/zeno.hooks.json` into `.claude/settings.json`
    - optionally merge `.claude/settings.example.json` for OTEL env settings
 4) Run `/hooks` in Claude Code to refresh hook registrations.
+5) If `CLAUDE_PROJECT_DIR` is not set, hooks fall back to `$PWD`; run Claude Code from the repo root or set the env var.
 
 ## Verification
 - Run `claude --debug` and confirm hooks fire.

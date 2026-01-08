@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/zeno/scripts/session_start.py\""
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/skills/zeno/scripts/session_start.py\""
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/zeno/scripts/user_prompt_submit.py\""
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/skills/zeno/scripts/user_prompt_submit.py\""
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/zeno/scripts/stop.py\"",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/skills/zeno/scripts/stop.py\"",
             "timeout": 60
           }
         ]
@@ -36,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/zeno/scripts/precompact.py\""
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/skills/zeno/scripts/precompact.py\""
           }
         ]
       }
@@ -47,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/zeno/scripts/post_tool_use.py\""
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/skills/zeno/scripts/post_tool_use.py\""
           }
         ]
       }

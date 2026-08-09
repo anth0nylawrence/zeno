@@ -1,3 +1,5 @@
+
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Compatible](https://img.shields.io/badge/Claude%20Code-Compatible-blue)](https://claude.ai/code)
 [![Docs](https://img.shields.io/badge/Docs-Read%20the%20manual-brightgreen)](README.md)
@@ -488,8 +490,8 @@ Zeno is a Claude Code skill paired with hooks for always-on persistence.
    ```
 
 2. Use the preconfigured settings (fast path) and refresh:
-   - `.claude/settings.json` is already included when you copy `claude-code/claude/` to `.claude/`
-   - Run `/hooks` to reload
+   - `settings.example.json` is included when you copy `claude-code/claude/` to `.claude/`
+   - Copy it to `.claude/settings.json` and run `/hooks` to reload
 
    Manual merge option:
    - Merge `.claude/hooks/zeno.hooks.json` into `.claude/settings.json`
